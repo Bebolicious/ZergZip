@@ -1,7 +1,15 @@
-# Tauri + React + Typescript
+# ZergZip:
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+⚠️ Warning: Project is still in development and might not work as intended ⚠️
 
-## Recommended IDE Setup
+ZergZip is a tiny application that allows users to quickly drag & drop files and make a compressed zip-file.
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Structure:
+
+- `Desktop`: [Tauri](https://tauri.studio).
+- `Web`: [React](https://reactjs.org) + [Typescript](https://www.typescriptlang.org/).
+
+### Libraries:
+
+Material UI: [Mui](https://mui.com/) is a React component library
+Zip-rs: A [zip](https://docs.rs/zip/0.6.6/zip/) library for rust which supports reading and writing of simple ZIP files.

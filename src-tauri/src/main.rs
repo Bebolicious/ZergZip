@@ -40,7 +40,6 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             //ta bort fil från vec
         }
         "clear" => {
-            println!("i clear");
             temp_files = _files;
             *files = temp_files.to_vec()
         }
