@@ -13,5 +13,5 @@ ZergZip is a tiny application that allows users to quickly drag & drop files and
 
 ### Libraries:
 
-- `Material UI`: [Mui](https://mui.com/) is a React component library
+- `Material UI`: [Mui](https://mui.com/) is a React component library.
 - `Zip-rs`: A [zip](https://docs.rs/zip/0.6.6/zip/) library for rust which supports reading and writing of simple ZIP files.
