@@ -37,7 +37,7 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             *files = temp_files.to_vec()
         }
         "remove" => {
-            //ta bort fil från vec
+            //ta bort filer
         }
         "clear" => {
             temp_files = _files;
