@@ -4,12 +4,6 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
 import { useEffect, useState } from 'react';
 
-interface ButtonState {
-    id: number;
-    active: boolean;
-    file: string;
-}
-
 export const FileCards = ({
     files,
     handleFiles,
@@ -25,7 +19,7 @@ export const FileCards = ({
         let tempFiles = [] as string[];
 
         if (filesToRemove.includes(url)) {
-            tempFiles = filesToRemove.filter((e) => e !== url);
+            tempFiles = filesToRemove.filter((f) => f !== url);
             setFilesToRemove(tempFiles);
         } else {
             tempFiles = filesToRemove;

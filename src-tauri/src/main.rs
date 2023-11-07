@@ -45,8 +45,6 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             *files = temp_files.to_vec()
         }
         "clear" => {
-            println!("{:?}", _files);
-            println!("{:?}", temp_files);
             temp_files = _files;
             *files = temp_files.to_vec()
         }
