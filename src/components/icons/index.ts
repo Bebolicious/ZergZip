@@ -1,3 +1,3 @@
-import { DropzoneIcon as DropZone } from "./dropzoneIcon";
+import { DropzoneIcon as DropZone } from './dropzoneIcon';
 
 export default DropZone;

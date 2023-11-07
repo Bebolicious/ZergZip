@@ -37,9 +37,16 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             *files = temp_files.to_vec()
         }
         "remove" => {
-            //ta bort fil från vec
+            for file in _files {
+                if let Some(pos) = temp_files.iter().position(|x: &String| *x == file) {
+                    temp_files.remove(pos);
+                }
+            }
+            *files = temp_files.to_vec()
         }
         "clear" => {
+            println!("{:?}", _files);
+            println!("{:?}", temp_files);
             temp_files = _files;
             *files = temp_files.to_vec()
         }
