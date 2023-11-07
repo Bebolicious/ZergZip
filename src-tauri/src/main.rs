@@ -37,7 +37,12 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             *files = temp_files.to_vec()
         }
         "remove" => {
-            //ta bort filer
+            for file in _files {
+                if let Some(pos) = temp_files.iter().position(|x: &String| *x == file) {
+                    temp_files.remove(pos);
+                }
+            }
+            *files = temp_files.to_vec()
         }
         "clear" => {
             temp_files = _files;
@@ -76,7 +81,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![compress, set_files])
         .menu(menu)
-        .on_menu_event(|event| match event.menu_item_id() {
+        .on_menu_event(|event: tauri::WindowMenuEvent| match event.menu_item_id() {
             "exit" => {
                 std::process::exit(0);
             }
