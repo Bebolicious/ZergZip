@@ -96,7 +96,7 @@ function App() {
                     <DropZoneContainer />
                 )}
 
-                <Box sx={{ margin: '20px 00px 0px 0px' }}>
+                <Box sx={{ margin: '20px 0px 0px 0px' }}>
                     {!files ? (
                         <Button
                             sx={{
@@ -128,7 +128,7 @@ function App() {
                                 Select files
                             </Typography>
                         </Button>
-                    ) : fileSelection ? (
+                    ) : fileSelection && fileSelection.length > 0 ? (
                         <Button
                             sx={{
                                 padding: '0.75rem 1.3rem',

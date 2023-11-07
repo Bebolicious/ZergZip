@@ -81,7 +81,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![compress, set_files])
         .menu(menu)
-        .on_menu_event(|event| match event.menu_item_id() {
+        .on_menu_event(|event: tauri::WindowMenuEvent| match event.menu_item_id() {
             "exit" => {
                 std::process::exit(0);
             }
