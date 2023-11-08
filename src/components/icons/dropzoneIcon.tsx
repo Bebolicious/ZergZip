@@ -58,12 +58,20 @@ export const DropzoneIcon = () => {
                     marginTop: '10px',
                     fontFamily: 'Gothic Regular',
                     fontSize: '16px',
-                    color: 'white'
+                    color: 'white',
+                    userSelect: 'none'
                 }}
             >
                 Drag & Drop files here
             </Typography>
-            <Typography sx={{ marginTop: '20px', fontFamily: 'Gothic Regular', color: 'white' }}>
+            <Typography
+                sx={{
+                    marginTop: '20px',
+                    fontFamily: 'Gothic Regular',
+                    color: 'white',
+                    userSelect: 'none'
+                }}
+            >
                 or
             </Typography>
         </Box>
