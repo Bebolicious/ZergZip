@@ -21,11 +21,9 @@ export const FileCards = ({
         if (currentFiles.length > 0) {
             currentFiles.forEach(function (elem, i = 0) {
                 if (elem === url) {
-                    console.log('found', elem, url);
                     const filtered = currentFiles.filter((elem) => elem !== url);
                     currentFiles = filtered;
                 } else {
-                    console.log('not found', elem, url);
                     currentFiles.push(url);
                 }
                 i++;
