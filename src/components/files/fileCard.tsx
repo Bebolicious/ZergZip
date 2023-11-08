@@ -2,32 +2,40 @@ import { Badge, Box, Paper, Typography } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const FileCards = ({
     files,
     handleFiles,
-    clearSelections
+    clearSelections,
+    filesUpForRemoval
 }: {
     files: string[];
     handleFiles: (fileName: string[]) => void;
-    clearSelections?: boolean;
+    clearSelections: () => void;
+    filesUpForRemoval: string[];
 }) => {
-    const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
-
-    const setRemoveFiles = (url: string) => {
-        let tempFiles = [] as string[];
-
-        if (filesToRemove.includes(url)) {
-            tempFiles = filesToRemove.filter((f) => f !== url);
-            setFilesToRemove(tempFiles);
+    function setRemoveFiles(url: string) {
+        const stateClone = structuredClone(filesUpForRemoval);
+        let currentFiles: string[] = stateClone;
+        if (currentFiles.length > 0) {
+            currentFiles.forEach(function (elem, i = 0) {
+                if (elem === url) {
+                    const filtered = currentFiles.filter((elem) => elem !== url);
+                    currentFiles = filtered;
+                } else {
+                    currentFiles.push(url);
+                }
+                i++;
+            });
         } else {
-            tempFiles = filesToRemove;
-            tempFiles.push(url);
-            setFilesToRemove(tempFiles);
+            currentFiles.push(url);
         }
-        handleFiles(tempFiles);
-    };
+        if (currentFiles.length === 0) {
+            clearSelections();
+        }
+        handleFiles(currentFiles);
+    }
 
     return (
         <Box
@@ -41,7 +49,7 @@ export const FileCards = ({
             }}
         >
             {files.map((url, i) => (
-                <FileCard url={url} id={i} onClick={setRemoveFiles} />
+                <FileCard key={url} url={url} id={i} onClick={setRemoveFiles} />
             ))}
         </Box>
     );
@@ -74,18 +82,17 @@ const getFileTypeIcon = (fileName: string): JSX.Element => {
 const FileCard = ({
     url,
     id,
-    onClick,
-    clearSelections
+    onClick
 }: {
     url: string;
     id: number;
     onClick: (fileName: string) => void;
-    clearSelections?: boolean;
 }) => {
     const [isActive, setIsActive] = useState<boolean>(false);
 
     return (
         <Paper
+            key={id}
             sx={{
                 width: '110px',
                 height: '140px',

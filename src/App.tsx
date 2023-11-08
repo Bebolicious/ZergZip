@@ -11,7 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 function App() {
     const [files, setFiles] = useState<string[] | undefined>();
-    const [fileSelection, setFileSelection] = useState<string[] | undefined>();
+    const [fileSelection, setFileSelection] = useState<string[]>([]);
     // async function zipFile() {
     //   await invoke("compress", {
     //     source: "FlightPlan.pdf",
@@ -37,17 +37,22 @@ function App() {
         setFiles(undefined);
     }
 
+    function clearSelections() {
+        setFileSelection([]);
+    }
+
     function handleFiles(_files: string[]) {
-        if (_files.length >= 1) {
-            setFileSelection(_files);
-        } else {
-            setFileSelection(undefined);
-        }
+        setFileSelection(_files);
     }
 
     async function removeFiles() {
-        setFiles(await invoke('set_files', { method: 'remove', files: fileSelection }));
-        setFileSelection(undefined);
+        const a: string[] = await invoke('set_files', { method: 'remove', files: fileSelection });
+        setFileSelection([]);
+        if (a.length === 0) {
+            setFiles(undefined);
+        } else {
+            setFiles(a as string[]);
+        }
     }
 
     return (
@@ -62,7 +67,7 @@ function App() {
                     backgroundColor: 'transparent'
                 }}
             >
-                {files ? (
+                {files?.length === 0 || files ? (
                     <Typography
                         sx={{
                             fontSize: '50px',
@@ -91,7 +96,12 @@ function App() {
                 )}
 
                 {files && files.length >= 1 ? (
-                    <FileCards handleFiles={handleFiles} files={files} />
+                    <FileCards
+                        handleFiles={handleFiles}
+                        files={files}
+                        clearSelections={clearSelections}
+                        filesUpForRemoval={fileSelection}
+                    />
                 ) : (
                     <DropZoneContainer />
                 )}
@@ -128,7 +138,7 @@ function App() {
                                 Select files
                             </Typography>
                         </Button>
-                    ) : fileSelection && fileSelection.length > 0 ? (
+                    ) : fileSelection.length > 0 ? (
                         <Button
                             sx={{
                                 padding: '0.75rem 1.3rem',
