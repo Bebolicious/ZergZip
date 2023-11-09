@@ -7,12 +7,10 @@ import { useState } from 'react';
 export const FileCards = ({
     files,
     handleFiles,
-    clearSelections,
     filesUpForRemoval
 }: {
     files: string[];
     handleFiles: (fileName: string[]) => void;
-    clearSelections: () => void;
     filesUpForRemoval: string[];
 }) => {
     function setRemoveFiles(url: string) {
@@ -30,9 +28,6 @@ export const FileCards = ({
             });
         } else {
             currentFiles.push(url);
-        }
-        if (currentFiles.length === 0) {
-            clearSelections();
         }
         handleFiles(currentFiles);
     }
@@ -97,7 +92,13 @@ const FileCard = ({
                 width: '110px',
                 height: '140px',
                 backgroundColor: '#3c4145',
-                border: isActive ? 'solid #911d38 3px' : 'solid #3c4145 3px'
+                transition: 'all 200ms',
+                border: isActive ? 'solid #911d38 3px' : 'solid #3c4145 3px',
+                cursor: 'pointer',
+                '&:hover': {
+                    backgroundColor: '#555c61',
+                    borderColor: isActive ? 'solid #911d38 3px' : '#555c61'
+                }
             }}
             data-id={id}
             onClick={() => {
@@ -139,7 +140,8 @@ const FileCard = ({
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
-                        userSelect: 'none'
+                        userSelect: 'none',
+                        cursor: 'pointer'
                     }}
                 >
                     {convertAbsolutePathToFilename(url)}
