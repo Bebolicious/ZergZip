@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
 import './App.css';
 import { Box, Button, Typography } from '@mui/material';
 import { DEFAULT_FILE_EXTENSION } from './model/types';
 import FileDropContext from './lib/fileDrop/index';
-import FolderZipIcon from '@mui/icons-material/FolderZip';
+import FolderIcon from '@mui/icons-material/Folder';
 import { FileCards } from './components/files/fileCard';
 import { DropZoneContainer } from './lib/fileDrop/dropzone';
 import CloseIcon from '@mui/icons-material/Close';
+import { open } from '@tauri-apps/api/dialog';
+import { addFiles } from './queries/addFiles';
+import { ApiInvoke } from './api/apiFactory';
+import { clearFiles } from './queries/clearFiles';
+import { removeFiles } from './queries/removeFiles';
+import CompressIcon from '@mui/icons-material/Compress';
 
 function App() {
     const [files, setFiles] = useState<string[] | undefined>();
@@ -20,43 +25,56 @@ function App() {
     // }
 
     const fileUpload = async (_files: string[]) => {
-        await addFiles(_files);
+        const args: ApiInvoke = {
+            endpoint: 'set_files',
+            extraArguments: { method: 'add', files: _files }
+        };
+        let files = await addFiles(args);
+        setFiles(files);
     };
 
-    async function addFiles(files: string[]) {
-        setFiles(
-            await invoke('set_files', {
-                method: 'add',
-                files: files
-            })
-        );
-    }
-
-    async function clearFiles() {
-        await invoke('set_files', { method: 'clear', files: [] });
+    async function clearFileUpload() {
+        const args: ApiInvoke = {
+            endpoint: 'set_files',
+            extraArguments: { method: 'clear', files: [] }
+        };
+        await clearFiles(args);
         setFiles(undefined);
     }
 
-    function clearSelections() {
+    async function removeFromFileUpload() {
+        const args: ApiInvoke = {
+            endpoint: 'set_files',
+            extraArguments: { method: 'remove', files: fileSelection }
+        };
+        const files = await removeFiles(args);
         setFileSelection([]);
+
+        if (files.length === 0) {
+            setFiles(undefined);
+        } else {
+            setFiles(files);
+        }
+    }
+
+    async function openFileExplorer() {
+        const files = await open({
+            multiple: true
+        });
+
+        if (files === null) {
+            //
+        } else {
+            fileUpload(files as string[]);
+        }
     }
 
     function handleFiles(_files: string[]) {
         setFileSelection(_files);
     }
 
-    async function removeFiles() {
-        const a: string[] = await invoke('set_files', { method: 'remove', files: fileSelection });
-        setFileSelection([]);
-        if (a.length === 0) {
-            setFiles(undefined);
-        } else {
-            setFiles(a as string[]);
-        }
-    }
-
     return (
-        <FileDropContext fn={fileUpload}>
+        <FileDropContext filesUpload={fileUpload}>
             <Box
                 sx={{
                     display: 'flex',
@@ -99,14 +117,13 @@ function App() {
                     <FileCards
                         handleFiles={handleFiles}
                         files={files}
-                        clearSelections={clearSelections}
                         filesUpForRemoval={fileSelection}
                     />
                 ) : (
                     <DropZoneContainer />
                 )}
 
-                <Box sx={{ margin: '20px 0px 0px 0px' }}>
+                <Box sx={{ margin: '20px 0px 0px 0px', display: 'flex', gap: '20px' }}>
                     {!files ? (
                         <Button
                             sx={{
@@ -115,24 +132,22 @@ function App() {
                                 color: 'white',
                                 boder: '1px solid black',
                                 borderColor: '#2a2e32',
-
                                 '&:hover': {
                                     backgroundColor: '#3c4145',
                                     borderColor: '#3c4145'
                                 }
                             }}
+                            onClick={() => openFileExplorer()}
                             variant="outlined"
                             endIcon={
-                                <FolderZipIcon
-                                    sx={{ padding: '0px 0px 2px 10px' }}
-                                    fontSize="large"
-                                />
+                                <FolderIcon sx={{ padding: '0px 0px 2px 10px' }} fontSize="large" />
                             }
                         >
                             <Typography
                                 sx={{
                                     fontFamily: 'Gothic Regular',
-                                    textTransform: 'none'
+                                    textTransform: 'none',
+                                    transition: 'all 200ms'
                                 }}
                             >
                                 Select files
@@ -146,14 +161,13 @@ function App() {
                                 color: 'white',
                                 boder: '1px solid black',
                                 borderColor: '#2a2e32',
-
                                 '&:hover': {
                                     backgroundColor: '#3c4145',
                                     borderColor: '#3c4145'
                                 }
                             }}
                             variant="outlined"
-                            onClick={() => removeFiles()}
+                            onClick={() => removeFromFileUpload()}
                             endIcon={
                                 <CloseIcon sx={{ padding: '0px 0px 2px 10px' }} fontSize="large" />
                             }
@@ -161,7 +175,8 @@ function App() {
                             <Typography
                                 sx={{
                                     fontFamily: 'Gothic Regular',
-                                    textTransform: 'none'
+                                    textTransform: 'none',
+                                    transition: 'all 200ms'
                                 }}
                             >
                                 Remove Selection
@@ -182,7 +197,7 @@ function App() {
                                 }
                             }}
                             variant="outlined"
-                            onClick={() => clearFiles()}
+                            onClick={() => clearFileUpload()}
                             endIcon={
                                 <CloseIcon sx={{ padding: '0px 0px 2px 10px' }} fontSize="large" />
                             }
@@ -197,6 +212,39 @@ function App() {
                             </Typography>
                         </Button>
                     )}
+                    {files && files.length >= 1 ? (
+                        <Button
+                            sx={{
+                                padding: '0.75rem 1.3rem',
+                                backgroundColor: '#2a2e32',
+                                color: 'white',
+                                boder: '1px solid black',
+                                borderColor: '#2a2e32',
+
+                                '&:hover': {
+                                    backgroundColor: '#7d5c9c',
+                                    borderColor: '#3c4145'
+                                }
+                            }}
+                            variant="outlined"
+                            onClick={() => clearFileUpload()}
+                            endIcon={
+                                <CompressIcon
+                                    sx={{ padding: '0px 0px 2px 10px' }}
+                                    fontSize="large"
+                                />
+                            }
+                        >
+                            <Typography
+                                sx={{
+                                    fontFamily: 'Gothic Regular',
+                                    textTransform: 'none'
+                                }}
+                            >
+                                Zip Files
+                            </Typography>
+                        </Button>
+                    ) : null}
                 </Box>
             </Box>
         </FileDropContext>

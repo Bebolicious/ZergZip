@@ -33,6 +33,8 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
             for x in _files {
                 temp_files.push(x.to_string());
             }
+            temp_files.sort();
+            temp_files.dedup();
 
             *files = temp_files.to_vec()
         }

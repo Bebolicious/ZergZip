@@ -10,10 +10,10 @@ const styling = {
 
 export const FileDrop = ({
     children,
-    fn
+    filesUpload
 }: {
     children: JSX.Element;
-    fn: (file: string[]) => void;
+    filesUpload: (file: string[]) => void;
 }) => {
     const [isDropping, setIsDropping] = useState<boolean>(false);
 
@@ -21,7 +21,7 @@ export const FileDrop = ({
         let fileDropListener = listen(
             'tauri://file-drop',
             async ({ event, payload }: { event: any; payload: string[] }) => {
-                fn(payload);
+                filesUpload(payload);
                 setIsDropping(false);
             }
         );
