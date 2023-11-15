@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { DEFAULT_FILE_EXTENSION } from './model/types';
 import FileDropContext from './lib/fileDrop/index';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -13,16 +13,28 @@ import { ApiInvoke } from './api/apiFactory';
 import { clearFiles } from './queries/clearFiles';
 import { removeFiles } from './queries/removeFiles';
 import CompressIcon from '@mui/icons-material/Compress';
+import { compress } from './queries/compress';
+import EmojiFoodBeverageOutlinedIcon from '@mui/icons-material/EmojiFoodBeverageOutlined';
+import { CompressionPicker } from './components/compression/compressionPicker';
+import { TargetLocationPicker } from './components/files/targetLocationPicker';
+import { CompressionNaming } from './components/compression/compressionNaming';
 
 function App() {
     const [files, setFiles] = useState<string[] | undefined>();
     const [fileSelection, setFileSelection] = useState<string[]>([]);
-    // async function zipFile() {
-    //   await invoke("compress", {
-    //     source: "FlightPlan.pdf",
-    //     target: "compressed_file" + DEFAULT_FILE_EXTENSION,
-    //   });
-    // }
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const zipFiles = async (_files: string[]) => {
+        setLoading(true);
+        const args: ApiInvoke = {
+            endpoint: 'compress_files',
+            extraArguments: { method: 'test', files: _files, target: '' }
+        };
+        await compress(args);
+        setLoading(false);
+        setFileSelection([]);
+        clearFileUpload();
+    };
 
     const fileUpload = async (_files: string[]) => {
         const args: ApiInvoke = {
@@ -73,6 +85,45 @@ function App() {
         setFileSelection(_files);
     }
 
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    textAlign: 'center',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                    top: 100,
+                    backgroundColor: 'transparent'
+                }}
+            >
+                <CircularProgress size="15rem" sx={{ color: '#7d5c9c' }} />
+                <Typography
+                    sx={{
+                        fontSize: '32px',
+                        color: 'white',
+                        marginTop: '20px',
+                        marginRight: '35px'
+                    }}
+                >
+                    Zippin'
+                    <EmojiFoodBeverageOutlinedIcon
+                        sx={{
+                            color: '#7d5c9c',
+                            fontSize: '32px',
+                            paddingTop: '0px',
+                            position: 'absolute',
+                            marginLeft: '10px',
+                            marginTop: '5px'
+                        }}
+                    />
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
         <FileDropContext filesUpload={fileUpload}>
             <Box
@@ -85,6 +136,13 @@ function App() {
                     backgroundColor: 'transparent'
                 }}
             >
+                {files?.length !== 0 && files && (
+                    <>
+                        <CompressionPicker compressionSelection={() => {}} />
+                        <TargetLocationPicker setTargetLocation={() => {}} />
+                        <CompressionNaming setCompressedFilename={() => {}} />
+                    </>
+                )}
                 {files?.length === 0 || files ? (
                     <Typography
                         sx={{
@@ -227,7 +285,7 @@ function App() {
                                 }
                             }}
                             variant="outlined"
-                            onClick={() => clearFileUpload()}
+                            onClick={() => zipFiles(files)}
                             endIcon={
                                 <CompressIcon
                                     sx={{ padding: '0px 0px 2px 10px' }}
