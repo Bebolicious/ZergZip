@@ -4,19 +4,55 @@
 extern crate zip;
 
 use std::fs::File;
-use std::io;
-use std::io::BufReader;
-use std::io::BufWriter;
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 use tauri::State;
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
-use zip::write::FileOptions;
-use zip::ZipWriter;
+use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
 struct Files {
     files: Mutex<Vec<String>>,
 }
+// #[tauri::command]
+// fn compress2(files_to_compress: Vec<PathBuf>, _target: PathBuf) {
+//     println!("nu körs det 1");
+//     let zip_file_path: &Path = Path::new("compressed_files.zip");
+//     let zip_file: File = File::create(&zip_file_path).unwrap();
+
+//     let mut zip: ZipWriter<File> = ZipWriter::new(zip_file);
+
+//     // // Define the files you want to compress.
+//     // let files_to_compress: Vec<PathBuf> = vec![
+//     //     PathBuf::from("exampleImage.png"),
+//     //     PathBuf::from(".gitignore"),
+//     //     // Add more files as needed
+//     // ];
+//     println!("nu körs det");
+
+//     // Set compression options (e.g., compression method)
+//     let options: FileOptions =
+//         FileOptions::default().compression_method(CompressionMethod::DEFLATE);
+
+//     // Iterate through the files and add them to the ZIP archive.
+//     for file_path in &files_to_compress {
+//         let file: File = File::open(file_path).unwrap();
+//         let file_name: &str = file_path.file_name().unwrap().to_str().unwrap();
+
+//         // Adding the file to the ZIP archive.
+//         zip.start_file(file_name, options).unwrap();
+
+//         let mut buffer: Vec<u8> = Vec::new();
+//         io::copy(&mut file.take(u64::MAX), &mut buffer).unwrap();
+
+//         zip.write_all(&buffer).unwrap();
+//     }
+
+//     zip.finish().unwrap();
+
+//     println!("Files compressed successfully to {:?}", zip_file_path);
+// }
 
 #[tauri::command]
 fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<String> {
@@ -56,18 +92,49 @@ fn set_files(method: &str, state: State<Files>, _files: Vec<String>) -> Vec<Stri
     return files.to_vec();
 }
 
-#[tauri::command]
-fn compress(target: String, source: &str) {
-    let mut _source: BufReader<File> = BufReader::new(File::open(source).unwrap());
-    let _target: BufWriter<File> = BufWriter::new(File::create(target).unwrap());
-    let mut zip_writer: ZipWriter<BufWriter<File>> = ZipWriter::new(_target);
+#[tauri::command(async)]
+fn compress_files(method: &str, _files: Vec<PathBuf>, _target: String) -> bool {
+    match method {
+        "test" => {
+            println!("nu kör jag i compress");
+            let zip_file_path: &Path = Path::new("compressed_files.zip");
+            let zip_file: File = File::create(&zip_file_path).unwrap();
 
-    zip_writer
-        .start_file(source, FileOptions::default())
-        .unwrap();
-    // This is only workable because we're only writing one file to our ZIP.
-    let mut zip_writer: BufWriter<ZipWriter<BufWriter<File>>> = BufWriter::new(zip_writer);
-    io::copy(&mut _source, &mut zip_writer).unwrap();
+            let mut zip: ZipWriter<File> = ZipWriter::new(zip_file);
+
+            // // Define the files you want to compress.
+            // let files_to_compress: Vec<PathBuf> = vec![
+            //     PathBuf::from("exampleImage.png"),
+            //     PathBuf::from(".gitignore"),
+            //     // Add more files as needed
+            // ];
+            println!("nu körs det");
+
+            // Set compression options (e.g., compression method)
+            let options: FileOptions =
+                FileOptions::default().compression_method(CompressionMethod::DEFLATE);
+
+            // Iterate through the files and add them to the ZIP archive.
+            for file_path in &_files {
+                let file: File = File::open(file_path).unwrap();
+                let file_name: &str = file_path.file_name().unwrap().to_str().unwrap();
+
+                // Adding the file to the ZIP archive.
+                zip.start_file(file_name, options).unwrap();
+
+                let mut buffer: Vec<u8> = Vec::new();
+                io::copy(&mut file.take(u64::MAX), &mut buffer).unwrap();
+
+                zip.write_all(&buffer).unwrap();
+            }
+
+            zip.finish().unwrap();
+
+            println!("Files compressed successfully to {:?}", zip_file_path);
+            return true;
+        }
+        _ => false,
+    }
 }
 
 fn main() {
@@ -81,7 +148,7 @@ fn main() {
         .manage(Files {
             files: Mutex::new(Vec::new()),
         })
-        .invoke_handler(tauri::generate_handler![compress, set_files])
+        .invoke_handler(tauri::generate_handler![compress_files, set_files])
         .menu(menu)
         .on_menu_event(|event| match event.menu_item_id() {
             "exit" => {
